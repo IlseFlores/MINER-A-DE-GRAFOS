@@ -1,0 +1,148 @@
+{
+  "title": "MINI PROYECTO2",
+  "version": "2.3",
+  "settings": {
+    "pagenumber": 0,
+    "editable": true,
+    "fullscreenEnabled": false,
+    "parameters": {
+      "undefined": "",
+      "undefined_display": "",
+      "neodash_articulogrupo_descripcion": "BEREL",
+      "neodash_articulogrupo_descripcion_display": "BEREL",
+      "neodash_articulo_descripcion": "BROCHA 3",
+      "neodash_articulo_descripcion_display": "BROCHA 3"
+    },
+    "theme": "light"
+  },
+  "pages": [
+    {
+      "title": "Main Page",
+      "reports": [
+        {
+          "id": "cb9fa6ed-09c0-4923-84ca-559524bd7a12",
+          "title": "Principales ciudades con más número de clientes",
+          "query": "MATCH (n:Ciudad)-[r:APARECE_EN_LA]->(m:Cliente)\nRETURN n.nombre AS NombreCiudad, COUNT(m) AS NumeroClientes\n\n\n",
+          "width": 5,
+          "height": 2,
+          "x": 0,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "c7ea5a0e-f777-44a5-859b-6e3043e159eb",
+          "title": "Tipo de Artículo",
+          "query": "MATCH (n:`ArticuloGrupo`) \nWHERE toLower(toString(n.`descripcion`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`descripcion` as value,  n.`descripcion` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "width": 3,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Node Property",
+            "entityType": "ArticuloGrupo",
+            "propertyType": "descripcion",
+            "propertyTypeDisplay": "descripcion",
+            "parameterName": "neodash_articulogrupo_descripcion"
+          },
+          "schema": []
+        },
+        {
+          "id": "3c185e46-d9c3-41d1-b05f-1949542eaf7a",
+          "title": "Artículos de $neodash_articulogrupo_descripcion",
+          "query": "MATCH (n:ArticuloGrupo)-[r:TIENE_GRUPOS_DE]->(m:Articulo) WHERE\n      n.descripcion = $neodash_articulogrupo_descripcion\nRETURN n ,r, m\n\n\n",
+          "width": 8,
+          "height": 2,
+          "x": 3,
+          "y": 0,
+          "type": "graph",
+          "selection": {
+            "ArticuloGrupo": "descripcion",
+            "TIENE_GRUPOS_DE": "(label)",
+            "Articulo": "descripcion"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "ArticuloGrupo",
+              "descripcion",
+              "id_articulogrupo"
+            ],
+            [
+              "TIENE_GRUPOS_DE"
+            ],
+            [
+              "Articulo",
+              "descripcion",
+              "ultimocostofecha",
+              "minimo",
+              "codigo",
+              "ultimocosto",
+              "reorden",
+              "id_controlalmacen",
+              "ivaPorcentaje",
+              "id_articulogrupo",
+              "id_umd",
+              "precio",
+              "descuentomaximo",
+              "id_articulo",
+              "id_articulotipo"
+            ]
+          ]
+        },
+        {
+          "id": "94d6986c-5bd8-4c71-a286-a7788a6bb7df",
+          "title": "Top vendedores",
+          "query": "MATCH (n:Cliente)<-[r:TIENE]-(m:Vendedor) \nRETURN m.Nombre AS NombreVendedor, COUNT(n) AS CantidadClientes \nORDER BY CantidadClientes DESC\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 5,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "id": "2a61fb5b-c00b-4b4f-bf65-56df941f434b",
+          "title": "Umd",
+          "query": "\nMATCH (n:Articulo)<-[m:TIENE_UMD_DE]-(d:Umd)WHERE\nn.descripcion =  $neodash_articulo_descripcion\nRETURN n.descripcion, d.descripcion\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 3,
+          "y": 4,
+          "type": "table",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "id": "140fdea5-bf02-4725-ac29-6b5e0c5d0730",
+          "title": "ARTICULO",
+          "query": "MATCH (n:`Articulo`) \nWHERE toLower(toString(n.`descripcion`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`descripcion` as value,  n.`descripcion` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "width": 3,
+          "height": 2,
+          "x": 0,
+          "y": 4,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Node Property",
+            "entityType": "Articulo",
+            "propertyType": "descripcion",
+            "propertyTypeDisplay": "descripcion",
+            "parameterName": "neodash_articulo_descripcion"
+          },
+          "schema": []
+        }
+      ]
+    }
+  ],
+  "parameters": {},
+  "extensions": {
+    "active": true,
+    "activeReducers": []
+  }
+}

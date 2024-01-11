@@ -1,0 +1,330 @@
+{
+  "title": "GOT",
+  "version": "2.3",
+  "settings": {
+    "pagenumber": 0,
+    "editable": true,
+    "fullscreenEnabled": false,
+    "parameters": {
+      "undefined": "",
+      "undefined_display": "",
+      "neodash_person_label": "Ned",
+      "neodash_person_label_display": "Ned"
+    },
+    "theme": "light"
+  },
+  "pages": [
+    {
+      "title": "Main Page",
+      "reports": [
+        {
+          "id": "e67ed22f-8546-43ce-a098-bc47dad8c2ca",
+          "title": "Esquema del grafo",
+          "query": "CALL db.schema.visualization\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "graph",
+          "selection": {
+            "Person": "name",
+            "TALK_TO": "(label)"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "Person",
+              "name",
+              "indexes",
+              "constraints"
+            ],
+            [
+              "TALK_TO"
+            ]
+          ]
+        },
+        {
+          "id": "73face8d-6e61-4db7-b988-4f05d8205449",
+          "title": "Mayor relación importante",
+          "query": "MATCH (p1:Person)-[r:TALK_TO]->(p2:Person)\nWITH p1, p2, r\nORDER BY r.Weight DESC\nLIMIT 1\nRETURN p1.Label AS Person1, p2.Label AS Person2, r.Weight AS MaxWeight\n\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 8,
+          "y": 0,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "bc5453a8-a3c0-48a6-a366-b5b57dd5122e",
+          "title": "Menor relación importante",
+          "query": "MATCH (p1:Person)-[r:TALK_TO]->(p2:Person)\nWITH p1, p2, r\nORDER BY r.Weight ASC\nLIMIT 1\nRETURN p1.Label AS Person1, p2.Label AS Person2, r.Weight AS MinWeight\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 0,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "id": "a70ad0c8-285e-468c-8336-8315d81ffcf2",
+          "title": "Grafo del personaje $neodash_person_label  a un salto",
+          "query": "MATCH (p:Person{Label:$neodash_person_label})\nMATCH (p) - [r*1..1] - (j)\nRETURN p,r,j\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 10,
+          "type": "graph",
+          "selection": {
+            "Person": "Label",
+            "TALK_TO": "(label)"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "Person",
+              "IN_DEGREE",
+              "OUT_DEGREE",
+              "pageRank",
+              "centrality",
+              "Label",
+              "DEGREE",
+              "betweenness",
+              "Id"
+            ],
+            [
+              "TALK_TO",
+              "Weight"
+            ]
+          ]
+        },
+        {
+          "id": "c74e54a6-2cac-4c35-9cc9-aa9eecd785ed",
+          "title": "Personaje al que le hablan mas",
+          "query": "MATCH (p:Person) RETURN p.Label, p.IN_DEGREE AS IN_DEGREE ORDER BY IN_DEGREE DESC, p.Label ASC LIMIT 5\n\n\n",
+          "width": 5,
+          "height": 2,
+          "x": 7,
+          "y": 4,
+          "type": "pie",
+          "selection": {
+            "index": "p.Label",
+            "value": "IN_DEGREE",
+            "key": "(none)"
+          },
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "0d247666-4225-4ace-bc03-8c5a37c78fc1",
+          "title": "saltos que tarda en recorrer todo el grafo el personaje Irogenia",
+          "query": "MATCH (p:Person{Label:'Irogenia'})\nMATCH (p) - [*1..1] - (j)\nMATCH (p) - [*1..2] - (n)\nMATCH (p) - [*1..4] - (l)\nMATCH (p) - [*1..6] - (m)\nRETURN p.Label AS PERSONA, \n     COUNT(DISTINCT j) AS Salto1,\n     COUNT(DISTINCT n) AS Salto2,\n     COUNT(DISTINCT l) AS Salto4,\n     COUNT(DISTINCT m) AS Solto6\n\n\n",
+          "width": 7,
+          "height": 2,
+          "x": 0,
+          "y": 4,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "5e44bcbb-f53c-4b9f-8423-76b38f51c217",
+          "title": "personaje que habla con más personas",
+          "query": "MATCH (p:Person)\nRETURN p.Label, p.OUT_DEGREE AS OUT_DEGREE\nORDER BY OUT_DEGREE DESC, p.Label ASC LIMIT 5\n\n\n\n\n",
+          "width": 5,
+          "height": 2,
+          "x": 3,
+          "y": 0,
+          "type": "bar",
+          "selection": {
+            "index": "p.Label",
+            "value": "OUT_DEGREE",
+            "key": "(none)"
+          },
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "5b9d2d2a-005d-4d54-8dca-f87b67e8423f",
+          "title": "Personaje al que le hablan menos",
+          "query": "MATCH (p:Person{Label:\"Aegon\"})-[:TALK_TO]->(n:Person)\nWHERE p <> n\nWITH p, COLLECT(n) AS amigos\nORDER BY p.centrality ASC\nLIMIT 1\nRETURN p.Label AS personajeMenosPopular ,[node in amigos | node.Label] AS amigos\n",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 6,
+          "type": "value",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "c74bc6a7-3d8d-4e6d-9849-51781a26663a",
+          "title": "Personaje con mas conexiones ",
+          "query": "MATCH(p:Person)RETURN p.Label, p.betweenness ORDER BY p.betweenness DESC \n\n\n",
+          "width": 4,
+          "height": 2,
+          "x": 0,
+          "y": 8,
+          "type": "table",
+          "selection": {},
+          "settings": {}
+        },
+        {
+          "id": "2543eb05-afb0-4b61-aa81-7bd13fb46d14",
+          "title": "Personajes mas cercanos a ned",
+          "query": "MATCH (n:Person{Label:'Tyrion'})-[r:TALK_TO]->(m:Person)\nWHERE n <> m\nRETURN n,r,m\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 9,
+          "y": 10,
+          "type": "graph",
+          "selection": {
+            "Person": "Label",
+            "TALK_TO": "(label)"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "Person",
+              "IN_DEGREE",
+              "OUT_DEGREE",
+              "pageRank",
+              "centrality",
+              "Label",
+              "DEGREE",
+              "betweenness",
+              "Id"
+            ],
+            [
+              "TALK_TO",
+              "Weight"
+            ]
+          ]
+        },
+        {
+          "id": "75202c41-ca15-43bc-892a-ff9871060540",
+          "title": "TOP 5 personajes mas importantes",
+          "query": "MATCH (p:Person)\nWHERE p.pageRank > 0.5 \nRETURN p.Label,p.pageRank ORDER BY p.pageRank DESC LIMIT 5 \n\n\n\n",
+          "width": 3,
+          "height": 2,
+          "x": 9,
+          "y": 6,
+          "type": "bar",
+          "selection": {
+            "index": "p.Label",
+            "value": "p.pageRank",
+            "key": "(none)"
+          },
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "059a7c1d-4c4d-45e6-abed-37c1293f0b96",
+          "title": "personaje más importante en la serie en términos de mantener las conversaciones entre otros personajes",
+          "query": "MATCH(p:Person)RETURN p.Label, p.betweenness ORDER BY p.betweenness DESC LIMIT 5 \n\n\n",
+          "width": 9,
+          "height": 2,
+          "x": 3,
+          "y": 2,
+          "type": "pie",
+          "selection": {
+            "index": "p.Label",
+            "value": "p.betweenness",
+            "key": "(none)"
+          },
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "f799252f-3509-438c-b61e-b6c62e138d13",
+          "title": "Personajes menos influyentes en la serie",
+          "query": "MATCH(p:Person)RETURN p.Label, p.pageRank ORDER BY p.pageRank ASC LIMIT 5\n\n\n\n",
+          "width": 5,
+          "height": 2,
+          "x": 4,
+          "y": 8,
+          "type": "pie",
+          "selection": {
+            "index": "p.Label",
+            "value": "p.pageRank",
+            "key": "(none)"
+          },
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "bd4dec8b-fc18-4983-8108-9ed4910fbe22",
+          "title": "Personaje con mas amigos importantes",
+          "query": "MATCH (p:Person)-[:TALK_TO]->(n:Person)\nWHERE p <> n\nWITH p, COUNT(n) AS cantidadAmigosImportantes\nORDER BY cantidadAmigosImportantes DESC\nLIMIT 1\nRETURN p.Label AS personajeConMasAmigosImportantes, cantidadAmigosImportantes\n\n\n",
+          "width": 5,
+          "height": 2,
+          "x": 4,
+          "y": 6,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "schema": []
+        },
+        {
+          "id": "6418c81b-4b26-492a-85c7-a4e2c6a2a8f0",
+          "title": "grafo del personaje a dos saltos",
+          "query": "MATCH (p:Person{Label:$neodash_person_label})\nMATCH (p) - [r*1..2] - (j)\nRETURN p,r,j\n\n\n",
+          "width": 5,
+          "height": 2,
+          "x": 4,
+          "y": 10,
+          "type": "graph",
+          "selection": {
+            "Person": "Label",
+            "TALK_TO": "(label)"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "Person",
+              "IN_DEGREE",
+              "OUT_DEGREE",
+              "pageRank",
+              "centrality",
+              "Label",
+              "DEGREE",
+              "betweenness",
+              "Id"
+            ],
+            [
+              "TALK_TO",
+              "Weight"
+            ]
+          ]
+        },
+        {
+          "id": "5e633ceb-1beb-446e-b49a-c389deffed02",
+          "title": "Personajes",
+          "query": "MATCH (n:`Person`) \nWHERE toLower(toString(n.`Label`)) CONTAINS toLower($input) \nRETURN DISTINCT n.`Label` as value,  n.`Label` as display ORDER BY size(toString(value)) ASC LIMIT 5",
+          "width": 3,
+          "height": 2,
+          "x": 9,
+          "y": 8,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Node Property",
+            "entityType": "Person",
+            "propertyType": "Label",
+            "propertyTypeDisplay": "Label",
+            "parameterName": "neodash_person_label"
+          },
+          "schema": []
+        }
+      ]
+    }
+  ],
+  "parameters": {},
+  "extensions": {
+    "active": true,
+    "activeReducers": []
+  }
+}
